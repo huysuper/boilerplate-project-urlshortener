@@ -9,7 +9,7 @@ const dns = require('dns');
 const port = process.env.PORT || 3000;
 
 let shorturlDB = [];
-let urlError = { error: 'invalid url' };
+let urlError = {"error":"Invalid URL"};
 
 
 app.use(cors());
@@ -24,15 +24,16 @@ app.get('/', function(req, res) {
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 var urlVerify = (req, res, next) => {
   let url = req.body.url;
+  console.log(url);
   if (url == undefined) {
-    resstatus(400).json(urlError);
+    res.json(urlError);
     return;
   }
   let urlParser;
   try {
     urlParser = new URL(url);
   } catch (error) {
-    res.status(400).json(urlError);
+    res.json(urlError);
     return;
   }
 
@@ -42,8 +43,7 @@ var urlVerify = (req, res, next) => {
   dns.lookup(urlParser.host, options, 
     (err, address, family) => {
         if (err) {
-          console.log(address, family);
-          res.status(400).json(urlError);
+          res.json(urlError);
         } else {
           next();
         }
@@ -53,7 +53,11 @@ app.post('/api/shorturl', urlencodedParser, urlVerify, function(req, res) {
   let url = req.body.url;
   if (shorturlDB.includes(url)) {
     res.json({
-      orig
+      original_url : url, 
+      short_url : shorturlDB.indexOf(url) + 1
+    });
+    return;
+  }
   shorturlDB.push(url);
   res.json({
     original_url : url, 
